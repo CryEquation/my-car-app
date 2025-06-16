@@ -27,11 +27,7 @@ interface CarsApiResponse {
 }
 
 interface HomeProps {
-  searchParams: {
-    _page?: string;
-    _sort?: string;
-    _order?: string;
-  };
+  searchParams: { [key: string]: string | string[] | undefined };
 }
 
 async function getCars(
@@ -210,9 +206,9 @@ async function SortOptions({ currentSort, currentOrder, currentPage }: { current
 }
 
 export default async function Home({ searchParams }: HomeProps) {
-  const page = searchParams._page ? parseInt(searchParams._page) : 1;
-  const sort = searchParams._sort;
-  const order = searchParams._order;
+  const page = Array.isArray(searchParams._page) ? parseInt(searchParams._page[0]) : parseInt(searchParams._page || '1');
+  const sort = Array.isArray(searchParams._sort) ? searchParams._sort[0] : searchParams._sort;
+  const order = Array.isArray(searchParams._order) ? searchParams._order[0] : searchParams._order;
 
   const { data: cars, meta } = await getCars(page, sort, order);
 
