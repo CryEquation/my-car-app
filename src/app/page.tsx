@@ -27,7 +27,7 @@ interface CarsApiResponse {
 }
 
 interface HomeProps {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<any>; // Changed to Promise<any> to satisfy PageProps constraint during Vercel build
 }
 
 async function getCars(
@@ -206,9 +206,18 @@ async function SortOptions({ currentSort, currentOrder, currentPage }: { current
 }
 
 export default async function Home({ searchParams }: HomeProps) {
-  const page = Array.isArray(searchParams._page) ? parseInt(searchParams._page[0]) : parseInt(searchParams._page || '1');
-  const sort = Array.isArray(searchParams._sort) ? searchParams._sort[0] : searchParams._sort;
-  const order = Array.isArray(searchParams._order) ? searchParams._order[0] : searchParams._order;
+  const awaitedSearchParams = await searchParams; // Await the promise
+
+  // Now, cast the result to the expected object shape
+  const resolvedSearchParams = awaitedSearchParams as {
+    _page?: string | string[] | undefined;
+    _sort?: string | string[] | undefined;
+    _order?: string | string[] | undefined;
+  };
+
+  const page = Array.isArray(resolvedSearchParams._page) ? parseInt(resolvedSearchParams._page[0]) : parseInt(resolvedSearchParams._page || '1');
+  const sort = Array.isArray(resolvedSearchParams._sort) ? resolvedSearchParams._sort[0] : resolvedSearchParams._sort;
+  const order = Array.isArray(resolvedSearchParams._order) ? resolvedSearchParams._order[0] : resolvedSearchParams._order;
 
   const { data: cars, meta } = await getCars(page, sort, order);
 
